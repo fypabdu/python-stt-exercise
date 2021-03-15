@@ -1,0 +1,1 @@
+tar.exe -acf FrontEnd.zip application.py config.py requirements.txt static templates .ebextensions

@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+{% if current_user.is_authenticated %}
+Click <em>speech analysis</em> to do some speech to text stuff...
+{% else %}
+Click <em>login in / sign up</em> to access this site.
+{% endif %}
+{% endblock %}

@@ -1,0 +1,8 @@
+requests
+Flask
+Flask-WTF
+aws-xray-sdk
+flask-login
+boto3
+python_jose
+Flask-Uploads

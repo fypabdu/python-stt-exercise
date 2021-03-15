@@ -1,0 +1,98 @@
+{% extends "main.html" %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/jsonview.bundle.css" />
+{% endblock %}
+{% block content %}
+    <h4>Upload Audio</h4>
+    <form name="upload_form" method="POST" enctype="multipart/form-data" action="{{ url_for('speech_analysis') }}">
+        {# Using these inputs as a means to differentiate (when POSTed) the multiple forms present on this page#}
+        <input type="hidden" name="form_name" value="upload_form">
+        {{ upload_form.csrf_token }}
+        <div class="control-group">
+            <label class="control-label">Speech File</label>
+            {{ upload_form.audio() }}
+        </div>
+        <div class="control-group">
+            <label class="control-label">Name</label>
+            <div class="controls">
+                {{ upload_form.file_name(class="form-control") }}
+            </div>
+        </div>
+        &nbsp;
+        <div class="control-group">
+            <div class="controls">
+                <input class="btn btn-primary" type="submit" value="Upload">
+            </div>
+        </div>
+        {% for field, errors in upload_form.errors.items() %}
+            <div class="alert alert-error">
+                {{ upload_form[field].label }}: {{ ', '.join(errors) }}
+            </div>
+        {% endfor %}
+
+    </form>
+
+    <hr/>
+    <h4>Speech Analysis Results</h4>
+    <form name="refresh_form" method="POST" action="{{ url_for('speech_analysis') }}">
+        <input type="hidden" name="form_name" value="refresh">
+        <button class="btn btn-primary pull-right" type="submit"><span class="glyphicon glyphicon-refresh"></span>
+            Refresh
+        </button>
+    </form>
+
+    {% if speech_analysis_results %}
+        {% for result in speech_analysis_results %}
+            <table class="table table-bordered">
+                <tr>
+                    <th scope="row" class="col-md-2">File Name</th>
+                    <td>{{ result.file_name }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="col-md-2">File ID</th>
+                    <td>{{ result.id }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="col-md-2">Status</th>
+                    <td>{{ result.status }}</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="col-md-2">Transcription</th>
+                    <td id="transcription_result-{{ result.id }}">{{ result.result }}</td>
+                </tr>
+            </table>
+
+        {% endfor %}
+    {% else %}
+         <div class="alert alert-info col-md-4">
+            Upload some audio files to get started...
+        </div>
+    {% endif %}
+
+
+
+{% endblock %}
+{% block script %}
+	<script src="/static/js/jsonview.bundle.js"></script>
+    <script>
+        {#
+            Displaying transcription result using a tree view:
+            https://github.com/pgrabovets/json-view
+
+            Each transcription result element is captured by a regex match and is rendered as a tree
+        #}
+
+
+        results = document.querySelectorAll('[id ^= "transcription_result-"]');
+        Array.prototype.forEach.call(results, callback);
+
+        function callback(element, iterator) {
+            let json_data = JSON.parse(element.innerText);
+            //we don't want to keep the raw JSON visible, hence we clear it off
+            element.innerText = ""
+            const tree = JsonView.createTree(json_data);
+            JsonView.render(tree, element);
+        }
+
+    </script>
+{% endblock %}
